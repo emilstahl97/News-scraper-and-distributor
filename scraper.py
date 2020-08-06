@@ -23,5 +23,21 @@ class Scraper:
     def store(self):
         r = redis.Redis(host='localhost', port=6379, db=0)
         for link in self.saved_links:
-            r.set(link.text, link)
+            r.set(link.text, str(link))
 
+    
+
+    def send(self):
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        links = [r.get(k) for k in r.keys()]
+        print(links)
+        r.flushdb()
+        
+
+
+
+s = Scraper(['energy'])
+s.parser()
+s.store()
+print(s.saved_links)
+#s.send()
