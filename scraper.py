@@ -36,22 +36,21 @@ class Scraper:
     
 
     def send(self):
-        client = login_with_session()
         r = redis.Redis(host='localhost', port=6379, db=0)
+        numberOfArticles = len(r.keys())
+        if numberOfArticles != 0:
+            client = login_with_session()
 
-        count = len(r.keys())
-        greeting = f"Hi, Emil. Here is {count} news article that you might found interesting"
-        client.send(Message(text=greeting), thread_id=client.uid, thread_type=ThreadType.USER)
+            greeting = f"Hi, Emil. Here is {numberOfArticles} news article that you might found interesting"
+            client.send(Message(text=greeting), thread_id=client.uid, thread_type=ThreadType.USER)
 
-        for k in r.keys():
-            url = re.findall(urlmaker.URL_REGEX, str(r.get(k)))
-            message = str(k)[2:-1] + "\n\n" + ' '.join(map(str, url))
-            client.send(Message(text=message), thread_id=client.uid, thread_type=ThreadType.USER)
+            for k in r.keys():
+                url = re.findall(urlmaker.URL_REGEX, str(r.get(k)))
+                message = str(k)[2:-1] + "\n\n" + ' '.join(map(str, url))
+                client.send(Message(text=message), thread_id=client.uid, thread_type=ThreadType.USER)
+            
+            r.flushdb()
         
-        r.flushdb()
-        
-
-
 
 s = Scraper(['is'])
 s.parser()
