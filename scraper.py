@@ -29,20 +29,20 @@ class Scraper:
     def store(self):
         r = redis.Redis(host='localhost', port=6379, db=0)
         for link in self.saved_links:
-            print(re.findall(urlmaker.URL_REGEX, str(link)))
             r.set(link.text, str(link))
 
     
 
     def send(self):
-        r = redis.Redis(host='localhost', port=6379, db=0)
-        links = [r.get(k) for k in r.keys()]
-        print(links)
-        
         client = login_with_session()
-        for link in links:
-            url = re.findall(urlmaker.URL_REGEX, str(link))
-            client.send(Message(text=url), thread_id=client.uid, thread_type=ThreadType.USER)
+        
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        for k in r.keys():
+            #print(k)
+            url = re.findall(urlmaker.URL_REGEX, str(r.get(k)))
+            final = str(k)[2:-1] + "\n" + str(url)
+            print(final)
+            #client.send(Message(text=final), thread_id=client.uid, thread_type=ThreadType.USER)
         
         r.flushdb()
         
