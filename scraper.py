@@ -1,12 +1,10 @@
 import re
-
 import redis
+import urlmaker
 import requests
-from bs4 import BeautifulSoup
 from fbchat import Client
 from fbchat.models import *
-
-import urlmaker
+from bs4 import BeautifulSoup
 from login import login_with_session
 
 
@@ -15,7 +13,6 @@ class Scraper:
         url = "https://news.ycombinator.com"
         self.markup = requests.get(url).text
         self.keywords = keywords
-
 
 
     def parser(self):
@@ -29,18 +26,16 @@ class Scraper:
     
 
     def store(self):
-        r = redis.Redis(host='localhost', port=6379, db=0)
+        self.server = redis.Redis(host='localhost', port=6379, db=0)
         for link in self.saved_links:
-            r.set(link.text, str(link))
+            self.server.set(link.text, str(link))
 
-    
 
     def send(self):
-        r = redis.Redis(host='localhost', port=6379, db=0)
+        r = self.server
         numberOfArticles = len(r.keys())
         if numberOfArticles != 0:
             client = login_with_session()
-
             greeting = f"Hi, Emil. Here is {numberOfArticles} news article that you might found interesting"
             client.send(Message(text=greeting), thread_id=client.uid, thread_type=ThreadType.USER)
 
@@ -51,8 +46,12 @@ class Scraper:
             
             r.flushdb()
         
-
-s = Scraper(['is'])
-s.parser()
-s.store()
-s.send()
+if __name__ == "__main__":
+    with open("keywords", "r") as f:
+        keywords = f.readlines()
+        keywords = [x.strip() for x in keywords]
+    
+    s = Scraper(keywords)
+    s.parser()
+    s.store()
+    s.send()
