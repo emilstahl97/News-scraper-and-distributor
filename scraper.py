@@ -38,11 +38,10 @@ class Scraper:
         
         r = redis.Redis(host='localhost', port=6379, db=0)
         for k in r.keys():
-            #print(k)
             url = re.findall(urlmaker.URL_REGEX, str(r.get(k)))
-            final = str(k)[2:-1] + "\n" + str(url)
-            print(final)
-            #client.send(Message(text=final), thread_id=client.uid, thread_type=ThreadType.USER)
+            final = str(k)[2:-1] + "\n\n" + ' '.join(map(str, url))
+            #print(final)
+            client.send(Message(text=final), thread_id=client.uid, thread_type=ThreadType.USER)
         
         r.flushdb()
         
