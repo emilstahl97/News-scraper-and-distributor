@@ -29,13 +29,7 @@ class Scraper:
     def store(self):
         r = redis.Redis(host='localhost', port=6379, db=0)
         for link in self.saved_links:
-            #print(link.text)
-            print("")
-            #string = str(link)
-            #split = string.split('"')[0]
-            #print(split)
-            string = str(link)
-            print(re.findall(urlmaker.URL_REGEX,string))
+            print(re.findall(urlmaker.URL_REGEX, str(link)))
             r.set(link.text, str(link))
 
     
@@ -47,7 +41,8 @@ class Scraper:
         
         client = login_with_session()
         for link in links:
-            client.send(Message(text=link), thread_id=client.uid, thread_type=ThreadType.USER)
+            url = re.findall(urlmaker.URL_REGEX, str(link))
+            client.send(Message(text=url), thread_id=client.uid, thread_type=ThreadType.USER)
         
         r.flushdb()
         
@@ -58,4 +53,4 @@ s = Scraper(['is'])
 s.parser()
 s.store()
 #print(s.saved_links)
-#s.send()
+s.send()
