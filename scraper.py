@@ -4,6 +4,8 @@ import redis
 from fbchat import Client
 from fbchat.models import *
 from login import login_with_session
+import re
+import urlmaker
 
 
 class Scraper:
@@ -27,6 +29,13 @@ class Scraper:
     def store(self):
         r = redis.Redis(host='localhost', port=6379, db=0)
         for link in self.saved_links:
+            #print(link.text)
+            print("")
+            #string = str(link)
+            #split = string.split('"')[0]
+            #print(split)
+            string = str(link)
+            print(re.findall(urlmaker.URL_REGEX,string))
             r.set(link.text, str(link))
 
     
@@ -49,4 +58,4 @@ s = Scraper(['is'])
 s.parser()
 s.store()
 #print(s.saved_links)
-s.send()
+#s.send()
