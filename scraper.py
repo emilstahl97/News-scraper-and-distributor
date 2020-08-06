@@ -1,6 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 import redis
+from fbchat import Client
+from fbchat.models import *
+from login import login_with_session
+
 
 class Scraper:
     def __init__(self, keywords):
@@ -31,13 +35,18 @@ class Scraper:
         r = redis.Redis(host='localhost', port=6379, db=0)
         links = [r.get(k) for k in r.keys()]
         print(links)
+        
+        client = login_with_session()
+        for link in links:
+            client.send(Message(text=link), thread_id=client.uid, thread_type=ThreadType.USER)
+        
         r.flushdb()
         
 
 
 
-s = Scraper(['energy'])
+s = Scraper(['is'])
 s.parser()
 s.store()
-print(s.saved_links)
-#s.send()
+#print(s.saved_links)
+s.send()
